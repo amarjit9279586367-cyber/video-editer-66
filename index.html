@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="ClipForge Pro - AI Podcast to Shorts Video Editor"
+  />
+  <title>ClipForge Pro — AI Podcast to Shorts</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="topbar">
+    <a class="brand" href="#entrySection">
+      <span class="brand-mark"><span class="brand-play"></span></span>
+      <span>ClipForge <span class="brand-pro">PRO</span></span>
+    </a>
+
+    <div class="backend-status" id="backendStatus">
+      <span class="status-dot"></span>
+      <span>Render endpoint configured</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- ENTRY SECTION -->
+    <section class="page-section entry-section" id="entrySection">
+      <div class="hero-copy">
+        <p class="eyebrow">AI VIDEO REPURPOSING STUDIO</p>
+        <h1>Turn long videos into <span>high-retention shorts.</span></h1>
+        <p class="description">
+          Submit a YouTube link or upload a local video. Your settings are sent
+          directly to your Render backend for real AI processing.
+        </p>
+      </div>
+
+      <section class="source-grid">
+        <article class="source-card youtube-source">
+          <div class="source-header">
+            <span class="source-icon youtube-icon">▶</span>
+            <div>
+              <h2>Paste YouTube Link</h2>
+              <p>Use a public or unlisted video URL.</p>
+            </div>
+          </div>
+
+          <div class="input-row">
+            <input
+              id="youtubeUrl"
+              type="url"
+              placeholder="https://youtube.com/watch?v=..."
+              autocomplete="url"
+            />
+            <button class="secondary-button" id="confirmYoutubeButton" type="button">
+              Confirm
+            </button>
+          </div>
+
+          <p class="input-help">
+            The full YouTube URL is sent to your backend only when you click Generate Clips.
+          </p>
+        </article>
+
+        <div class="source-divider"><span>OR</span></div>
+
+        <article class="source-card upload-source" id="uploadCard">
+          <input
+            id="localVideoInput"
+            type="file"
+            accept="video/mp4,video/webm,video/quicktime,video/x-m4v"
+            hidden
+          />
+
+          <button class="upload-trigger" id="uploadTrigger" type="button">
+            <span class="upload-icon">↑</span>
+            <span class="upload-copy">
+              <strong>Upload Local Video</strong>
+              <small>MP4, MOV, or WebM video file</small>
+            </span>
+            <span class="browse-text">Browse</span>
+          </button>
+        </article>
+      </section>
+
+      <section class="source-confirmation hidden" id="sourceConfirmation">
+        <div class="source-preview">
+          <img id="sourceThumbnail" src="" alt="Selected source preview" />
+          <span id="sourceDurationBadge">--:--</span>
+        </div>
+
+        <div class="source-details">
+          <span>✓ SOURCE READY</span>
+          <h3 id="sourceTitle">Selected source video</h3>
+          <p id="sourceMetadata">Ready to submit for backend processing.</p>
+        </div>
+
+        <button class="text-button" id="removeSourceButton" type="button">
+          Remove
+        </button>
+      </section>
+
+      <section class="config-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">STEP 02</p>
+            <h2>Configure Your Clips</h2>
+          </div>
+          <span>Sent directly to `/process`</span>
+        </div>
+
+        <div class="config-grid">
+          <div class="config-group">
+            <label>Video Aspect Ratio</label>
+
+            <div class="ratio-selector" id="ratioSelector">
+              <button class="ratio-button active" data-ratio="9:16" type="button">
+                <strong>9:16</strong>
+                <span>Shorts</span>
+              </button>
+
+              <button class="ratio-button" data-ratio="1:1" type="button">
+                <strong>1:1</strong>
+                <span>Square</span>
+              </button>
+
+              <button class="ratio-button" data-ratio="16:9" type="button">
+                <strong>16:9</strong>
+                <span>Normal</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="config-group">
+            <label for="durationSelect">Duration Per Clip</label>
+            <select id="durationSelect">
+              <option value="15">15 seconds</option>
+              <option value="30" selected>30 seconds</option>
+              <option value="60">60 seconds</option>
+              <option value="custom">Custom duration</option>
+            </select>
+          </div>
+
+          <div class="config-group">
+            <label for="reelCount">Number of Reels</label>
+            <select id="reelCount">
+              <option value="1">1 reel</option>
+              <option value="3" selected>3 reels</option>
+              <option value="5">5 reels</option>
+              <option value="auto">Auto — AI decides</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="custom-duration hidden" id="customDurationPanel">
+          <div>
+            <strong>Custom Duration</strong>
+            <p>Enter the exact maximum duration for each generated short.</p>
+          </div>
+
+          <label>
+            Minutes
+            <input id="customMinutes" type="number" min="0" max="59" value="0" />
+          </label>
+
+          <label>
+            Seconds
+            <input id="customSeconds" type="number" min="0" max="59" value="30" />
+          </label>
+        </div>
+
+        <button class="primary-button" id="generateButton" type="button">
+          <span>✦</span>
+          <span>Generate Clips</span>
+          <span>→</span>
+        </button>
+      </section>
+
+      <!-- EXACT RAW BACKEND RESPONSE FOR DEBUGGING -->
+      <section class="debug-panel hidden" id="debugPanel">
+        <div class="debug-header">
+          <div>
+            <p class="eyebrow">BACKEND DEBUG RESPONSE</p>
+            <h3 id="debugTitle">No playable video URL found</h3>
+          </div>
+
+          <button class="text-button" id="closeDebugButton" type="button">
+            Close
+          </button>
+        </div>
+
+        <p id="debugMessage">
+          The backend responded, but this frontend could not locate a usable video URL.
+        </p>
+
+        <pre id="rawResponseOutput"></pre>
+      </section>
+    </section>
+
+    <!-- GALLERY SECTION -->
+    <section class="page-section gallery-section hidden" id="gallerySection">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">REAL BACKEND RESULTS</p>
+          <h2>Generated Clips</h2>
+          <p class="description">
+            These clip URLs were returned directly from your Render backend.
+          </p>
+        </div>
+
+        <button class="secondary-button" id="newProjectButton" type="button">
+          + New Project
+        </button>
+      </div>
+
+      <div class="gallery-summary">
+        <span><strong id="clipCountLabel">0</strong> clips generated</span>
+        <span class="divider"></span>
+        <span><strong id="averageScoreLabel">0%</strong> average viral score</span>
+        <span class="complete-label">✓ Backend processing complete</span>
+      </div>
+
+      <div class="clip-gallery" id="clipGallery"></div>
+    </section>
+
+    <!-- PRO EDITOR -->
+    <section class="editor-section hidden" id="editorSection">
+      <header class="editor-topbar">
+        <div class="editor-title">
+          <button class="text-button" id="backToGalleryButton" type="button">
+            ← Back to clips
+          </button>
+
+          <span class="vertical-divider"></span>
+
+          <div>
+            <p class="eyebrow">PRO EDITOR</p>
+            <h2 id="editorClipTitle">Processed Clip</h2>
+          </div>
+        </div>
+
+        <button class="secondary-button" id="exportScrollButton" type="button">
+          Export →
+        </button>
+      </header>
+
+      <div class="editor-workspace">
+        <!-- TOOLS -->
+        <aside class="tools-panel">
+          <div class="tools-heading">
+            <div>
+              <p class="eyebrow">AI CREATIVE SUITE</p>
+              <h3>Pro Tools</h3>
+            </div>
+            <span>LIVE API</span>
+          </div>
+
+          <div class="tool-list">
+            <article class="tool-card">
+              <div class="tool-title">
+                <span class="tool-icon">◉</span>
+                <div>
+                  <h4>Voice Dubbing</h4>
+                  <p>Translate and render real dubbed audio</p>
+                </div>
+              </div>
+
+              <div class="language-grid">
+                <select id="dubFrom" aria-label="Source language">
+                  <option value="Auto-Detect" selected>From: Auto-Detect</option>
+                  <option value="English">From: English</option>
+                  <option value="Hindi">From: Hindi</option>
+                  <option value="Chinese">From: Chinese</option>
+                  <option value="French">From: French</option>
+                  <option value="Spanish">From: Spanish</option>
+                  <option value="Russian">From: Russian</option>
+                </select>
+
+                <select id="dubTo" aria-label="Target language">
+                  <option value="Hindi" selected>To: Hindi</option>
+                  <option value="English">To: English</option>
+                  <option value="Chinese">To: Chinese</option>
+                  <option value="French">To: French</option>
+                  <option value="Bhojpuri">To: Bhojpuri</option>
+                  <option value="Maithili">To: Maithili</option>
+                </select>
+              </div>
+
+              <button class="tool-button" data-action="dubbing" type="button">
+                Dub Voice
+              </button>
+            </article>
+
+            <article class="tool-card">
+              <div class="tool-title">
+                <span class="tool-icon">〽</span>
+                <div>
+                  <h4>Voice Changer</h4>
+                  <p>Render a different voice style</p>
+                </div>
+              </div>
+
+              <select id="voiceStyle">
+                <option value="Natural">Natural</option>
+                <option value="Deep">Deep</option>
+                <option value="Robotic">Robotic</option>
+                <option value="Energetic">Energetic</option>
+                <option value="Narrator">Narrator</option>
+              </select>
+
+              <button class="tool-button" data-action="voice_change" type="button">
+                Apply Voice
+              </button>
+            </article>
+
+            <article class="tool-card compact-tool">
+              <div class="tool-title">
+                <span class="tool-icon purple">T</span>
+                <div>
+                  <h4>Hormozi 3D Captions</h4>
+                  <p>Generate word-level captions</p>
+                </div>
+              </div>
+
+              <label class="toggle">
+                <input id="captionToggle" type="checkbox" />
+                <span></span>
+              </label>
+            </article>
+
+            <article class="tool-card compact-tool">
+              <div class="tool-title">
+                <span class="tool-icon">✦</span>
+                <div>
+                  <h4>AI B-Roll</h4>
+                  <p>Context-aware supporting visuals</p>
+                </div>
+              </div>
+
+              <button class="mini-tool-button" data-action="broll" type="button">
+                Generate
+              </button>
+            </article>
+
+            <article class="tool-card compact-tool">
+              <div class="tool-title">
+                <span class="tool-icon">⌁</span>
+                <div>
+                  <h4>Studio Sound</h4>
+                  <p>Noise killer and voice cleanup</p>
+                </div>
+              </div>
+
+              <button class="mini-tool-button" data-action="studio_sound" type="button">
+                Enhance
+              </button>
+            </article>
+
+            <article class="tool-card compact-tool">
+              <div class="tool-title">
+                <span class="tool-icon">▧</span>
+                <div>
+                  <h4>Viral Thumbnail</h4>
+                  <p>Generate final thumbnail artwork</p>
+                </div>
+              </div>
+
+              <button class="mini-tool-button" data-action="thumbnail" type="button">
+                Create
+              </button>
+            </article>
+          </div>
+        </aside>
+
+        <!-- PLAYER -->
+        <section class="editor-stage">
+          <div class="stage-toolbar">
+            <span class="ratio-label" id="editorRatioLabel">9:16</span>
+            <span>Real processed video</span>
+          </div>
+
+          <div class="video-stage">
+            <div class="video-canvas ratio-9-16" id="videoCanvas">
+              <video
+                id="editorVideo"
+                playsinline
+                preload="metadata"
+                controls
+              ></video>
+
+              <div class="caption-overlay hidden" id="captionOverlay">
+                <span>THIS IS HOW YOU</span>
+                <strong>BUILD MOMENTUM.</strong>
+              </div>
+
+              <!-- REAL BACKEND WAITING OVERLAY -->
+              <div class="processing-overlay hidden" id="processingOverlay">
+                <div class="spinner"></div>
+                <h3 id="processingTitle">Processing Request</h3>
+                <p id="processingDescription">
+                  Waiting for the Render backend response.
+                </p>
+                <small>
+                  Processing can take several minutes depending on source length and AI workload.
+                </small>
+              </div>
+            </div>
+          </div>
+
+          <div class="player-controls">
+            <button id="playButton" type="button">▶</button>
+            <span id="currentTime">00:00</span>
+            <input id="playbackRange" type="range" min="0" max="100" value="0" />
+            <span id="totalTime">00:00</span>
+          </div>
+        </section>
+
+        <!-- INSPECTOR -->
+        <aside class="inspector-panel">
+          <p class="eyebrow">CLIP SETTINGS</p>
+          <h3>Canvas</h3>
+
+          <label for="editorRatio">Aspect Ratio</label>
+          <select id="editorRatio">
+            <option value="9:16">9:16 — Shorts</option>
+            <option value="1:1">1:1 — Square</option>
+            <option value="16:9">16:9 — Landscape</option>
+          </select>
+
+          <label for="scaleRange">
+            Scale
+            <span id="scaleLabel">100%</span>
+          </label>
+          <input id="scaleRange" type="range" min="80" max="130" value="100" />
+
+          <label for="positionRange">
+            Vertical Position
+            <span id="positionLabel">50%</span>
+          </label>
+          <input id="positionRange" type="range" min="0" max="100" value="50" />
+
+          <div class="inspector-status">
+            <span>Active clip source</span>
+            <strong id="activeClipId">None</strong>
+          </div>
+        </aside>
+      </div>
+
+      <!-- TIMELINE -->
+      <section class="timeline-panel">
+        <div class="timeline-toolbar">
+          <span>Timeline</span>
+          <span id="timelineDuration">00:00</span>
+        </div>
+
+        <div class="timeline-grid">
+          <div class="timeline-labels">
+            <span>Video</span>
+            <span>Captions</span>
+            <span>Audio</span>
+          </div>
+
+          <div class="timeline-tracks">
+            <div class="timeline-track">
+              <div class="timeline-clip video-track" id="timelineVideoClip">
+                Processed Video
+              </div>
+            </div>
+
+            <div class="timeline-track">
+              <div class="timeline-clip caption-track hidden" id="timelineCaptionClip">
+                Hormozi 3D Captions
+              </div>
+            </div>
+
+            <div class="timeline-track">
+              <div class="timeline-clip audio-track">
+                ▁▃▆▂▅▇▃▂▆▅▁▃▆▂▅▇▃▂▆▅▁▃▆▂▅▇▃▂▆▅
+              </div>
+            </div>
+
+            <div class="timeline-playhead" id="timelinePlayhead"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- EXPORT -->
+      <section class="export-panel" id="exportPanel">
+        <div>
+          <p class="eyebrow">FINAL EXPORT</p>
+          <h3>Download Reel & Thumbnail</h3>
+          <p>Your Render backend receives the export quality and active clip settings.</p>
+        </div>
+
+        <div class="export-actions">
+          <select id="qualitySelect">
+            <option value="720p">720p HD</option>
+            <option value="1080p" selected>1080p Full HD</option>
+            <option value="4k">4K Ultra HD</option>
+          </select>
+
+          <button class="primary-button export-button" id="exportButton" type="button">
+            Download Reel & Thumbnail
+          </button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <script src="api.js"></script>
+  <script src="ui.js"></script>
+</body>
+</html>
